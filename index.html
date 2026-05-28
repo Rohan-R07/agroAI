@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>AI Dashboard</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- Sidebar -->
+
+    <div class="sidebar">
+
+      <div class="logo">
+        AgroAI
+      </div>
+
+      <div class="menu">
+
+        <a class="nav-link active" data-screen="dashboard">
+          🏠 Dashboard
+        </a>
+
+        <a class="nav-link" data-screen="analytics">
+          📊 Analytics
+        </a>
+
+        <a class="nav-link" data-screen="uploads">
+          📁 Uploads
+        </a>
+
+        <a class="nav-link" data-screen="gallery">
+          🖼 Gallery
+        </a>
+
+        <a class="nav-link" data-screen="history">
+          📜 History
+        </a>
+
+        <a class="nav-link" data-screen="reports">
+          📈 Reports
+        </a>
+
+        <a class="nav-link" data-screen="notifications">
+          🔔 Notifications
+        </a>
+
+        <a class="nav-link" data-screen="settings">
+          ⚙ Settings
+        </a>
+
+      </div>
+
+    </div>
+
+    <!-- Main -->
+
+    <div class="main">
+
+      <!-- Dashboard -->
+
+      <div class="screen active-screen" id="dashboard">
+
+        <div class="topbar">
+
+          <div>
+            <h1>AI Dashboard</h1>
+            <p>Modern intelligent monitoring platform</p>
+          </div>
+
+          <button class="btn">
+            Download Report
+          </button>
+
+        </div>
+
+        <div class="cards">
+
+          <div class="card">
+            <h2>Total Uploads</h2>
+            <p>1,284</p>
+          </div>
+
+          <div class="card">
+            <h2>AI Processed</h2>
+            <p>98%</p>
+          </div>
+
+          <div class="card">
+            <h2>Reports</h2>
+            <p>324</p>
+          </div>
+
+          <div class="card">
+            <h2>Accuracy</h2>
+            <p>99%</p>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Analytics -->
+
+      <div class="screen" id="analytics">
+
+        <div class="topbar">
+          <div>
+            <h1>Analytics</h1>
+            <p>AI Overview Analytics</p>
+          </div>
+        </div>
+
+        <div class="box">
+
+          <canvas id="analyticsChart"></canvas>
+
+        </div>
+
+      </div>
+
+      <!-- Upload -->
+
+      <div class="screen" id="uploads">
+
+        <div class="topbar">
+
+          <div>
+            <h1>Uploads</h1>
+            <p>Upload images for AI analysis</p>
+          </div>
+
+        </div>
+
+        <div class="box">
+
+          <div class="upload-area">
+
+            <h2>Upload Image</h2>
+
+            <p>
+              Drag and drop image here
+            </p>
+
+            <input type="file" id="imageInput" accept="image/*">
+
+            <div class="preview" id="preview">
+
+              <img id="previewImage">
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Gallery -->
+
+      <div class="screen" id="gallery">
+
+        <div class="topbar">
+
+          <div>
+            <h1>Gallery</h1>
+            <p>Uploaded Images</p>
+          </div>
+
+        </div>
+
+        <div class="gallery-grid">
+
+          <img src="https://picsum.photos/300?1">
+          <img src="https://picsum.photos/300?2">
+          <img src="https://picsum.photos/300?3">
+          <img src="https://picsum.photos/300?4">
+
+        </div>
+
+      </div>
+
+      <!-- History -->
+
+      <div class="screen" id="history">
+
+        <div class="topbar">
+
+          <div>
+            <h1>History</h1>
+            <p>Recent Activities</p>
+          </div>
+
+        </div>
+
+        <div class="activity">
+
+          <div class="activity-item">
+            <h3>Image Uploaded</h3>
+            <p>2 minutes ago</p>
+          </div>
+
+          <div class="activity-item">
+            <h3>Analytics Updated</h3>
+            <p>10 minutes ago</p>
+          </div>
+
+          <div class="activity-item">
+            <h3>Report Generated</h3>
+            <p>1 hour ago</p>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Reports -->
+
+      <div class="screen" id="reports">
+
+        <div class="topbar">
+
+          <div>
+            <h1>Reports</h1>
+            <p>Download generated reports</p>
+          </div>
+
+        </div>
+
+        <div class="cards">
+
+          <div class="card">
+            <h2>Weekly Report</h2>
+            <button class="btn">
+              Download
+            </button>
+          </div>
+
+          <div class="card">
+            <h2>Monthly Report</h2>
+            <button class="btn">
+              Download
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Notifications -->
+
+      <div class="screen" id="notifications">
+
+        <div class="topbar">
+
+          <div>
+            <h1>Notifications</h1>
+            <p>Latest Notifications</p>
+          </div>
+
+        </div>
+
+        <div class="activity">
+
+          <div class="activity-item">
+            <h3>AI Processing Completed</h3>
+            <p>5 mins ago</p>
+          </div>
+
+          <div class="activity-item">
+            <h3>Dashboard Updated</h3>
+            <p>20 mins ago</p>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Settings -->
+
+      <div class="screen" id="settings">
+
+        <div class="topbar">
+
+          <div>
+            <h1>Settings</h1>
+            <p>Dashboard Preferences</p>
+          </div>
+
+        </div>
+
+        <div class="box">
+
+          <h2>Appearance</h2>
+
+          <button class="btn">
+            Dark Mode
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+
+</html>
