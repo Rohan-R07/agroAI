@@ -1060,106 +1060,62 @@ function setupSpeechControls(btnId, selectId, statusId, textareaId) {
 
   if (!btn || !select || !status || !textarea) return;
 
-  let mediaRecorder = null;
-  let audioChunks = [];
-  let isRecording = false;
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    btn.style.display = "none";
+    status.innerText = "⚠️ Speech input not supported in this browser";
+    return;
+  }
+
+  let recognition = null;
+  let isListening = false;
 
   btn.addEventListener("click", () => {
-    if (isRecording) {
-      // Stop recording
-      if (mediaRecorder && mediaRecorder.state !== "inactive") {
-        mediaRecorder.stop();
-      }
+    if (isListening) {
+      if (recognition) recognition.stop();
       return;
     }
 
-    // Start recording via MediaRecorder
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(stream => {
-        audioChunks = [];
-        mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = select.value;
 
-        mediaRecorder.ondataavailable = (e) => {
-          if (e.data.size > 0) audioChunks.push(e.data);
-        };
+    recognition.onstart = () => {
+      isListening = true;
+      btn.innerHTML = "🛑 Stop";
+      btn.style.background = "#ef4444";
+      status.innerText = "🎙️ Listening... Speak now";
+    };
 
-        mediaRecorder.onstop = () => {
-          stream.getTracks().forEach(t => t.stop());
-          isRecording = false;
-          btn.innerHTML = "🎤 Speak";
-          btn.style.background = "linear-gradient(to right,#2563eb,#7c3aed)";
-          status.innerText = "⏳ Transcribing with Whisper...";
+    recognition.onend = () => {
+      isListening = false;
+      btn.innerHTML = "🎤 Speak";
+      btn.style.background = "linear-gradient(to right,#2563eb,#7c3aed)";
+      status.innerText = "";
+    };
 
-          const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-          const formData = new FormData();
-          formData.append("audio", audioBlob, "recording.webm");
-          formData.append("language", select.value);
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      textarea.value = textarea.value.trim() 
+        ? textarea.value + " " + transcript 
+        : transcript;
+      status.innerText = "✅ Transcribed!";
+      setTimeout(() => { status.innerText = ""; }, 2000);
+    };
 
-          fetch('/api/transcribe', { method: 'POST', body: formData })
-            .then(res => res.json())
-            .then(data => {
-              if (data.text) {
-                textarea.value = textarea.value.trim()
-                  ? textarea.value + " " + data.text
-                  : data.text;
-                status.innerText = "✅ Transcribed!";
-              } else {
-                status.innerText = "⚠️ " + (data.error || "No text detected");
-              }
-              setTimeout(() => { status.innerText = ""; }, 4000);
-            })
-            .catch(err => {
-              console.error("Whisper transcription error:", err);
-              status.innerText = "⚠️ Transcription failed";
-              setTimeout(() => { status.innerText = ""; }, 4000);
-            });
-        };
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+      if (event.error === 'not-allowed') {
+        status.innerText = "⚠️ Mic permission denied";
+      } else {
+        status.innerText = "⚠️ Error: " + event.error;
+      }
+      setTimeout(() => { status.innerText = ""; }, 3000);
+    };
 
-        mediaRecorder.start();
-        isRecording = true;
-        btn.innerHTML = "🛑 Stop";
-        btn.style.background = "#ef4444";
-        status.innerText = "🎙️ Recording... Click Stop when done";
-      })
-      .catch(err => {
-        console.error("Microphone access denied:", err);
-        status.innerText = "⚠️ Microphone access denied";
-        // Fallback to Web Speech API
-        fallbackWebSpeech(btn, select, status, textarea);
-      });
+    recognition.start();
   });
-}
-
-// Fallback: Web Speech API (if MediaRecorder is denied)
-function fallbackWebSpeech(btn, select, status, textarea) {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    status.innerText = "🎤 Speech not supported";
-    return;
-  }
-  const recognition = new SpeechRecognition();
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.lang = select.value;
-  recognition.start();
-
-  recognition.onstart = () => {
-    btn.innerHTML = "🛑 Stop";
-    btn.style.background = "#ef4444";
-    status.innerText = "Listening (browser fallback)...";
-  };
-  recognition.onend = () => {
-    btn.innerHTML = "🎤 Speak";
-    btn.style.background = "linear-gradient(to right,#2563eb,#7c3aed)";
-    status.innerText = "";
-  };
-  recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
-    textarea.value = textarea.value.trim() ? textarea.value + " " + transcript : transcript;
-  };
-  recognition.onerror = (event) => {
-    status.innerText = "Error: " + event.error;
-  };
 }
 
 function speakText(text, lang) {
