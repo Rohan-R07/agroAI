@@ -272,6 +272,18 @@ function loadGallery() {
     .then(res => res.json())
     .then(data => {
       galleryData = data;
+      
+      if (!data || data.length === 0) {
+        galleryGrid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 50px 20px; background: rgba(30, 41, 59, 0.4); border-radius: 20px; border: 2px dashed #334155;">
+            <div style="font-size: 50px; margin-bottom: 20px;">🖼️</div>
+            <h3 style="color: white; margin-bottom: 10px;">No images uploaded yet</h3>
+            <p style="color: #94a3b8;">Please upload plant or animal images in the respective sections to see them here in the gallery.</p>
+          </div>
+        `;
+        return;
+      }
+
       galleryGrid.innerHTML = data.map((item, index) => `
         <div class="card gallery-card" data-index="${index}" style="padding: 10px; display: flex; flex-direction: column; gap: 10px; text-align: left; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
           <img src="${item.url}" style="width: 100%; border-radius: 14px; height: 180px; object-fit: cover;">

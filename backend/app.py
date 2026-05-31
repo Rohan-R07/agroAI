@@ -1259,40 +1259,6 @@ def get_analytics():
 def get_history():
     # load_history already returns newest-first from Mongo
     history = load_history()[:20]
-    
-    # If empty, add standard initial items
-    if not history:
-        mock_history = [
-            {
-                "id": "mock_1",
-                "timestamp": "2026-05-28 14:30:10",
-                "filename": "tomato_leaf_blight.jpg",
-                "crop": "Tomato",
-                "disease": "Early Blight",
-                "status": "Diseased",
-                "confidence": 0.94
-            },
-            {
-                "id": "mock_2",
-                "timestamp": "2026-05-28 12:15:00",
-                "filename": "corn_rust.jpg",
-                "crop": "Corn",
-                "disease": "Rust",
-                "status": "Diseased",
-                "confidence": 0.88
-            },
-            {
-                "id": "mock_3",
-                "timestamp": "2026-05-28 09:05:45",
-                "filename": "apple_healthy.jpg",
-                "crop": "Apple",
-                "disease": "Healthy",
-                "status": "Healthy",
-                "confidence": 0.98
-            }
-        ]
-        return jsonify(mock_history)
-        
     return jsonify(history)
 
 # Delete History/Gallery Entry Endpoint
@@ -1376,15 +1342,6 @@ def get_gallery():
             }
             gallery_items.append(entry)
             
-    # Default picsum placeholders if gallery is empty
-    if not gallery_items:
-        return jsonify([
-            {"url": "https://picsum.photos/300?1", "crop": "Apple", "disease": "Healthy", "status": "Healthy"},
-            {"url": "https://picsum.photos/300?2", "crop": "Tomato", "disease": "Early Blight", "status": "Diseased"},
-            {"url": "https://picsum.photos/300?3", "crop": "Corn", "disease": "Rust", "status": "Diseased"},
-            {"url": "https://picsum.photos/300?4", "crop": "Potato", "disease": "Late Blight", "status": "Diseased"}
-        ])
-        
     return jsonify(gallery_items)
 
 # Serve uploaded images
