@@ -51,7 +51,8 @@ USE_MONGO = False
 
 if MONGO_URI != "YOUR_MONGODB_URI_PLACEHOLDER":
     try:
-        mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+        import certifi
+        mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000, tlsCAFile=certifi.where())
         mongo_client.admin.command('ping')
         mongo_db = mongo_client[DB_NAME]
         USE_MONGO = True
