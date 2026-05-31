@@ -86,7 +86,7 @@ HF_TOKEN_RESOLVED = _resolve_hf_token()
 
 # Default settings structure
 DEFAULT_SETTINGS = {
-    "model_id": "google/gemma-4-E4B-it",
+    "model_id": "meta-llama/Llama-3.2-11B-Vision-Instruct",
     "api_token": HF_TOKEN_RESOLVED,
     "inference_mode": "api",
     "pipeline_mode": "single",  # Gemma-4 multimodal vision model — directly analyzes images
@@ -110,7 +110,7 @@ def load_settings():
                 doc.pop("_id", None)
                 # Override to ensure correct token and Gemma-4 vision model are always active
                 doc["api_token"] = HF_TOKEN_RESOLVED
-                doc["model_id"] = "google/gemma-4-E4B-it"
+                doc["model_id"] = "meta-llama/Llama-3.2-11B-Vision-Instruct"
                 for k, v in DEFAULT_SETTINGS.items():
                     if k not in doc:
                         doc[k] = v
@@ -124,7 +124,7 @@ def load_settings():
     # Local fallback
     local_data = _load_json_db().get("settings", DEFAULT_SETTINGS.copy())
     local_data["api_token"] = HF_TOKEN_RESOLVED
-    local_data["model_id"] = "google/gemma-4-E4B-it"
+    local_data["model_id"] = "meta-llama/Llama-3.2-11B-Vision-Instruct"
     for k, v in DEFAULT_SETTINGS.items():
         if k not in local_data:
             local_data[k] = v
@@ -878,7 +878,7 @@ def run_llama_explanation(label, user_desc, api_token, model_id, mode="plant"):
     models_to_try = [
         model_id or "meta-llama/Llama-3.1-8B-Instruct",
         "Qwen/Qwen2.5-72B-Instruct",
-        "google/gemma-4-E4B-it",
+        "meta-llama/Llama-3.2-11B-Vision-Instruct",
         "meta-llama/Meta-Llama-3-8B-Instruct"
     ]
     
@@ -1034,7 +1034,7 @@ def query_gemma_4_multimodal(image_bytes, file_ext, api_token, system_prompt=Non
         required_keys = ["crop", "disease", "confidence", "status", "description", "recommendations"]
     
     settings = load_settings()
-    model_id = settings.get("model_id", "google/gemma-4-E4B-it")
+    model_id = settings.get("model_id", "meta-llama/Llama-3.2-11B-Vision-Instruct")
     
     chat_response = hf_client.chat.completions.create(
         model=model_id,
@@ -1188,7 +1188,7 @@ def handle_settings():
     settings = load_settings()
     if request.method == 'POST':
         data = request.json or {}
-        settings["model_id"] = data.get("model_id", settings.get("model_id", "google/gemma-4-E4B-it"))
+        settings["model_id"] = data.get("model_id", settings.get("model_id", "meta-llama/Llama-3.2-11B-Vision-Instruct"))
         # Only overwrite token if it's explicitly sent, or mask it
         token_sent = data.get("api_token", "")
         if token_sent != "******":
