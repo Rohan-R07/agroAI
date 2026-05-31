@@ -59,7 +59,6 @@ AgroAI is a modern, responsive, and beautiful AI-powered diagnostic platform des
    ```bash
    python backend/app.py
    ```
-   Open `http://127.0.0.1:5000` in your web browser.
 
 ---
 
