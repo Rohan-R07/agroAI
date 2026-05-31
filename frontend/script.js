@@ -819,19 +819,39 @@ function initializeVetFinder() {
     });
   }
 
+  const fallbackToIpLocation = () => {
+    console.log("[Location] GPS failed or blocked. Trying IP Geolocation fallback...");
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.latitude && data.longitude) {
+          console.log("[Location] IP Geolocation resolved coordinates:", data.city, data.latitude, data.longitude);
+          showVetHospitals(data.latitude, data.longitude);
+        } else {
+          // Ultimate fallback (New Delhi)
+          showVetHospitals(28.6139, 77.2090);
+        }
+      })
+      .catch(err => {
+        console.error("[Location] IP Geolocation failed:", err);
+        // Ultimate fallback (New Delhi)
+        showVetHospitals(28.6139, 77.2090);
+      });
+  };
+
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        console.log("[Location] GPS resolved coordinates:", position.coords.latitude, position.coords.longitude);
         showVetHospitals(position.coords.latitude, position.coords.longitude);
       },
       () => {
-        // Fallback to a default location (New Delhi)
-        showVetHospitals(28.6139, 77.2090);
+        fallbackToIpLocation();
       },
       { timeout: 8000 }
     );
   } else {
-    showVetHospitals(28.6139, 77.2090);
+    fallbackToIpLocation();
   }
 }
 
