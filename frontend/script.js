@@ -344,7 +344,8 @@ function showGalleryDetail(item) {
         newDeleteBtn.disabled = true;
         newDeleteBtn.innerHTML = "⏳ Deleting...";
         
-        fetch(`/api/history/${item.id}`, {
+        const deleteId = item.id || item.filename;
+        fetch(`/api/history/${deleteId}`, {
           method: 'DELETE'
         })
         .then(res => {

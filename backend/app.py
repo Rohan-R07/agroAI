@@ -1303,10 +1303,13 @@ def delete_history_entry(entry_id):
 
     if USE_MONGO:
         try:
+            # Try matching by id first, then by filename as fallback
             entry = mongo_db.history.find_one({"id": entry_id})
+            if not entry:
+                entry = mongo_db.history.find_one({"filename": entry_id})
             if entry:
                 filename_to_delete = entry.get("filename")
-                res = mongo_db.history.delete_one({"id": entry_id})
+                res = mongo_db.history.delete_one({"_id": entry["_id"]})
                 if res.deleted_count > 0:
                     deleted = True
         except Exception as e:
@@ -1353,6 +1356,7 @@ def get_gallery():
         filename = item.get("filename")
         if filename:
             entry = {
+                "id": item.get("id", ""),
                 "url": f"/api/uploads/{filename}",
                 "crop": item.get("crop", "Unknown"),
                 "disease": item.get("disease", "Unknown"),
