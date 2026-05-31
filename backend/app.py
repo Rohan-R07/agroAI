@@ -86,10 +86,10 @@ HF_TOKEN_RESOLVED = _resolve_hf_token()
 
 # Default settings structure
 DEFAULT_SETTINGS = {
-    "model_id": "meta-llama/Llama-3.1-8B-Instruct",
+    "model_id": "google/gemma-4-E4B-it",
     "api_token": HF_TOKEN_RESOLVED,
     "inference_mode": "api",
-    "pipeline_mode": "multi",  # Always run Multi-Model Pipeline (YOLOv11 → ViT → Llama 3.1)
+    "pipeline_mode": "single",  # Gemma-4 multimodal vision model — directly analyzes images
     "vit_model_id": "linkanjarad/mobilenet_v2_1.0_224-plant-disease-identification",
     "llama_model_id": "meta-llama/Llama-3.1-8B-Instruct"
 }
@@ -108,11 +108,9 @@ def load_settings():
             doc = mongo_db.settings.find_one({"_id": "app_settings"})
             if doc:
                 doc.pop("_id", None)
-                # Override to ensure multi-model, user's HF token, and working models are always locked in
+                # Override to ensure correct token and Gemma-4 vision model are always active
                 doc["api_token"] = HF_TOKEN_RESOLVED
-                doc["pipeline_mode"] = "multi"
-                doc["vit_model_id"] = "linkanjarad/mobilenet_v2_1.0_224-plant-disease-identification"
-                doc["llama_model_id"] = "meta-llama/Llama-3.1-8B-Instruct"
+                doc["model_id"] = "google/gemma-4-E4B-it"
                 for k, v in DEFAULT_SETTINGS.items():
                     if k not in doc:
                         doc[k] = v
@@ -126,9 +124,7 @@ def load_settings():
     # Local fallback
     local_data = _load_json_db().get("settings", DEFAULT_SETTINGS.copy())
     local_data["api_token"] = HF_TOKEN_RESOLVED
-    local_data["pipeline_mode"] = "multi"
-    local_data["vit_model_id"] = "linkanjarad/mobilenet_v2_1.0_224-plant-disease-identification"
-    local_data["llama_model_id"] = "meta-llama/Llama-3.1-8B-Instruct"
+    local_data["model_id"] = "google/gemma-4-E4B-it"
     for k, v in DEFAULT_SETTINGS.items():
         if k not in local_data:
             local_data[k] = v
