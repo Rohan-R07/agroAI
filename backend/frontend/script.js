@@ -210,7 +210,21 @@ analyzeBtn.addEventListener("click", () => {
       recsList.innerHTML = data.recommendations.map(rec => `<li>${rec}</li>`).join('');
 
       const warningEl = document.getElementById("resultWarning");
-      warningEl.style.display = "none";
+      if (data.status && data.status.toLowerCase() === "diseased") {
+        const sev = data.severity || "Moderate";
+        const sevColor = sev === "Critical" ? "#dc2626" : sev === "High" ? "#ef4444" : sev === "Moderate" ? "#f59e0b" : "#10b981";
+        warningEl.innerHTML = `<span style="font-size:18px;">⚠️</span> <strong>${sev} Severity</strong> — ${data.disease} detected on ${data.crop}. Immediate treatment recommended. Follow the solutions below.`;
+        warningEl.style.display = "block";
+        warningEl.style.background = sevColor + "22";
+        warningEl.style.borderLeft = "4px solid " + sevColor;
+        warningEl.style.color = "#fbbf24";
+        warningEl.style.padding = "12px 16px";
+        warningEl.style.borderRadius = "8px";
+        warningEl.style.marginBottom = "12px";
+        warningEl.style.fontSize = "14px";
+      } else {
+        warningEl.style.display = "none";
+      }
 
       // Draw bounding box if multi-model pipeline returned one
       const canvas = document.getElementById("bboxCanvas");
@@ -836,6 +850,12 @@ function showVetHospitals(lat, lng) {
 
   // Create dark-themed Leaflet map
   leafletMap = L.map(mapElement).setView([lat, lng], 13);
+  
+  // Invalidate size immediately and after a short timeout to handle the container transition/display rendering
+  leafletMap.invalidateSize();
+  setTimeout(() => {
+    if (leafletMap) leafletMap.invalidateSize();
+  }, 200);
 
   // Dark tile layer (CartoDB Dark Matter)
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -912,7 +932,7 @@ function showVetHospitals(lat, lng) {
             <div style="background: rgba(30, 41, 59, 0.6); padding: 14px; border-radius: 10px; border: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s;" 
                  onmouseover="this.style.background='rgba(30, 41, 59, 0.9)'" 
                  onmouseout="this.style.background='rgba(30, 41, 59, 0.6)'"
-                 onclick="if(leafletMap) leafletMap.setView([${pLat}, ${pLng}], 16)">
+                 onclick="if(leafletMap) { leafletMap.setView([${pLat}, ${pLng}], 16); leafletMap.invalidateSize(); }">
               <div>
                 <h4 style="color: white; font-size: 15px; margin: 0;">🏥 ${name}</h4>
                 <p style="color: #94a3b8; font-size: 13px; margin: 4px 0 0 0;">${address}</p>
@@ -924,15 +944,21 @@ function showVetHospitals(lat, lng) {
         }
       });
 
-      // Fit map bounds to show all markers
+      // Fit map bounds to show all markers with correct leaflet container dimensions
       if (places.length > 0) {
+        leafletMap.invalidateSize();
         const bounds = L.latLngBounds([[lat, lng]]);
         places.slice(0, 6).forEach(p => {
           const pLat = p.lat || (p.center && p.center.lat);
           const pLng = p.lon || (p.center && p.center.lon);
           if (pLat && pLng) bounds.extend([pLat, pLng]);
         });
-        leafletMap.fitBounds(bounds, { padding: [40, 40] });
+        setTimeout(() => {
+          if (leafletMap) {
+            leafletMap.invalidateSize();
+            leafletMap.fitBounds(bounds, { padding: [40, 40] });
+          }
+        }, 150);
       }
     })
     .catch(err => {

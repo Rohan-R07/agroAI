@@ -830,18 +830,28 @@ def query_gemma_4_multimodal(image_bytes, file_ext, api_token, system_prompt=Non
     
     if not system_prompt:
         system_prompt = (
-            "You are a world-class AI plant pathologist with deep expertise in botany and agricultural science. "
-            "Carefully analyze the provided leaf/plant image. FIRST, accurately identify the exact plant species "
-            "(e.g., Tomato, Potato, Corn/Maize, Rice, Wheat, Banana, Mango, Apple, Grape, Cotton, Soybean, Pepper, Citrus, etc.). "
-            "THEN diagnose any visible disease, pest damage, or nutrient deficiency. Be very precise with the crop name - "
-            "do NOT guess randomly. Look at leaf shape, venation patterns, color, size, and texture to identify the plant correctly. "
+            "You are a world-class AI plant pathologist and entomologist with deep expertise in botany, "
+            "agricultural science, and pest identification. "
+            "Carefully analyze the provided leaf/plant image. Perform ALL of these steps:\n"
+            "1. IDENTIFY the exact plant species from leaf shape, venation, color, and texture.\n"
+            "2. DETECT any visible diseases: fungal (Early Blight, Late Blight, Powdery Mildew, Rust, Anthracnose, "
+            "Sigatoka, Downy Mildew, Septoria), bacterial (Bacterial Leaf Spot, Fire Blight, Citrus Canker), "
+            "or viral (Mosaic Virus, Leaf Curl, Yellowing).\n"
+            "3. DETECT any insect/pest damage: look for holes, chew marks, stippling, webbing, honeydew, "
+            "sooty mold, leaf miners, galls, or visible insects (aphids, whiteflies, caterpillars, mites, "
+            "thrips, mealybugs, scale insects, leaf beetles, borers).\n"
+            "4. DETECT nutrient deficiencies: yellowing (nitrogen), purple discoloration (phosphorus), "
+            "brown leaf edges (potassium), interveinal chlorosis (iron/magnesium).\n"
+            "5. If the plant is genuinely healthy with NO signs of disease, pests, or deficiency, "
+            "report it as Healthy. Do NOT default to Healthy if there are ANY visible problems.\n\n"
             "The response MUST contain only a valid JSON matching this schema exactly:\n"
             "{\n"
             '  "crop": "Exact Crop/Plant Name",\n'
-            '  "disease": "Specific Disease Name (e.g. Early Blight, Late Blight, Bacterial Leaf Spot, Powdery Mildew, Anthracnose, Sigatoka, Healthy)",\n'
+            '  "disease": "Specific Disease or Pest Name (NOT just Healthy unless truly healthy)",\n'
             '  "confidence": 0.90,\n'
             '  "status": "Diseased" or "Healthy",\n'
-            '  "description": "Detailed disease/condition overview with visible symptoms",\n'
+            '  "severity": "Critical" or "High" or "Moderate" or "Low",\n'
+            '  "description": "Detailed description of visible symptoms, affected areas, and progression stage",\n'
             '  "recommendations": ["Specific Treatment 1", "Specific Treatment 2", "Specific Treatment 3"]\n'
             "}\n"
             "Return ONLY the raw JSON object inside triple backticks."
@@ -1203,20 +1213,21 @@ def upload_image():
     custom_prompt = None
     if user_description:
         custom_prompt = (
-            "You are a world-class AI plant pathologist with deep expertise in botany and agricultural science. "
-            "Carefully analyze the provided leaf/plant image. FIRST, accurately identify the exact plant species "
-            "(e.g., Tomato, Potato, Corn/Maize, Rice, Wheat, Banana, Mango, Apple, Grape, Cotton, Soybean, Pepper, Citrus, etc.). "
-            "THEN diagnose any visible disease, pest damage, or nutrient deficiency. Be very precise with the crop name. "
-            "Look at leaf shape, venation patterns, color, size, and texture to identify the plant correctly. "
-            f"\n\nThe farmer/user has also described the problem in their own words: \"{user_description}\"\n"
-            "Use this description as additional context to improve your diagnosis.\n\n"
+            "You are a world-class AI plant pathologist and entomologist. "
+            "Carefully analyze the provided leaf/plant image. "
+            "IDENTIFY the exact plant species. DETECT any diseases (fungal, bacterial, viral), "
+            "insect/pest damage (aphids, whiteflies, caterpillars, mites, thrips, leaf miners, beetles), "
+            "or nutrient deficiencies. Do NOT default to Healthy if there are ANY visible problems.\n"
+            f"\nThe farmer has described the problem: \"{user_description}\"\n"
+            "Use this description as critical context to improve your diagnosis.\n\n"
             "The response MUST contain only a valid JSON matching this schema exactly:\n"
             "{\n"
             '  "crop": "Exact Crop/Plant Name",\n'
-            '  "disease": "Specific Disease Name",\n'
+            '  "disease": "Specific Disease or Pest Name",\n'
             '  "confidence": 0.90,\n'
             '  "status": "Diseased" or "Healthy",\n'
-            '  "description": "Detailed disease/condition overview with visible symptoms",\n'
+            '  "severity": "Critical" or "High" or "Moderate" or "Low",\n'
+            '  "description": "Detailed description of visible symptoms, affected areas, and progression",\n'
             '  "recommendations": ["Specific Treatment 1", "Specific Treatment 2", "Specific Treatment 3"]\n'
             "}\n"
             "Return ONLY the raw JSON object inside triple backticks."
