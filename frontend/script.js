@@ -266,9 +266,9 @@ let galleryData = [];
 
 function loadGallery() {
   const galleryGrid = document.querySelector(".gallery-grid");
-  if (!galleryGrid) return;
+  if (!galleryGrid) return Promise.resolve();
 
-  fetch('/api/gallery')
+  return fetch('/api/gallery')
     .then(res => res.json())
     .then(data => {
       galleryData = data;
@@ -292,6 +292,15 @@ function loadGallery() {
       });
     })
     .catch(err => console.error("Error loading gallery:", err));
+}
+
+function showDeleteToast(message) {
+  const toast = document.createElement("div");
+  toast.innerText = message;
+  toast.style.cssText = "position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,0.3);transition:opacity 0.4s;";
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = "0"; }, 2000);
+  setTimeout(() => { toast.remove(); }, 2500);
 }
 
 function showGalleryDetail(item) {
@@ -340,7 +349,7 @@ function showGalleryDetail(item) {
     deleteBtn.parentNode.replaceChild(newDeleteBtn, deleteBtn);
     
     newDeleteBtn.addEventListener("click", () => {
-      if (confirm("Are you sure you want to delete this diagnosis record? This will permanently remove the record and physical image file.")) {
+      if (confirm("Are you sure you want to delete this diagnosis record?")) {
         newDeleteBtn.disabled = true;
         newDeleteBtn.innerHTML = "⏳ Deleting...";
         
@@ -353,10 +362,15 @@ function showGalleryDetail(item) {
           throw new Error("Could not delete record from server");
         })
         .then(resData => {
-          alert("Diagnosis deleted successfully!");
+          // Close modal immediately (no blocking alert)
           modal.style.display = "none";
           document.body.style.overflow = "auto";
-          loadGallery(); // Refresh the gallery grid instantly!
+
+          // Show non-blocking toast notification
+          showDeleteToast("✅ Diagnosis deleted successfully!");
+
+          // Wait for gallery to fully refresh before user can interact
+          return loadGallery();
         })
         .catch(err => {
           alert("Error deleting diagnosis: " + err.message);
