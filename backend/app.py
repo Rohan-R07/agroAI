@@ -1636,6 +1636,11 @@ def transcribe_audio():
     audio_file = request.files['audio']
     audio_bytes = audio_file.read()
     
+    # Read the language code sent from the frontend (e.g. "hi-IN", "ta-IN", "en-US")
+    lang_code = request.form.get("language", "en-US")
+    # Whisper expects ISO 639-1 codes (e.g. "hi", "ta", "bn", "en")
+    whisper_lang = lang_code.split("-")[0] if lang_code else "en"
+    
     settings = load_settings()
     api_token = settings.get("api_token", "")
     
@@ -1645,7 +1650,13 @@ def transcribe_audio():
     try:
         headers = {"Authorization": f"Bearer {api_token}"}
         url = f"{HF_INFERENCE_BASE}/openai/whisper-large-v3"
-        res = requests.post(url, headers=headers, data=audio_bytes, timeout=30)
+        
+        # Send language as a query parameter for Whisper to force correct transcription
+        params = {}
+        if whisper_lang != "en":
+            params["language"] = whisper_lang
+        
+        res = requests.post(url, headers=headers, data=audio_bytes, params=params, timeout=30)
         
         if res.status_code == 200:
             data = res.json()

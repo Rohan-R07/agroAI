@@ -1091,6 +1091,7 @@ function setupSpeechControls(btnId, selectId, statusId, textareaId) {
           const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
           const formData = new FormData();
           formData.append("audio", audioBlob, "recording.webm");
+          formData.append("language", select.value);
 
           fetch('/api/transcribe', { method: 'POST', body: formData })
             .then(res => res.json())
@@ -1164,10 +1165,29 @@ function speakText(text, lang) {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
+
+    // Pick the best matching voice for the selected language
+    const voices = window.speechSynthesis.getVoices();
+    const langBase = lang.split('-')[0]; // e.g. 'hi' from 'hi-IN'
+    const exactMatch = voices.find(v => v.lang === lang);
+    const partialMatch = voices.find(v => v.lang.startsWith(langBase));
+    if (exactMatch) {
+      utterance.voice = exactMatch;
+    } else if (partialMatch) {
+      utterance.voice = partialMatch;
+    }
+
+    utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
   } else {
     alert("Speech synthesis is not supported on this browser.");
   }
+}
+
+// Preload voices (Chrome loads them async)
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
+  window.speechSynthesis.getVoices();
 }
 
 // Bind plant screen voice elements
