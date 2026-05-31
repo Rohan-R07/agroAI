@@ -16,7 +16,9 @@ from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOADS_DIR = os.path.join(BASE_DIR, 'data', 'uploads')
 DATA_FILE = os.path.join(BASE_DIR, 'data', 'database.json')
-FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'frontend'))
+FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, 'frontend'))
+if not os.path.exists(FRONTEND_DIR):
+    FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'frontend'))
 
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 
