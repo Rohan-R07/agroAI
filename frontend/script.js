@@ -346,6 +346,8 @@ function showGalleryDetail(item) {
   const deleteBtn = document.getElementById("deleteGalleryItemBtn");
   if (deleteBtn) {
     const newDeleteBtn = deleteBtn.cloneNode(true);
+    newDeleteBtn.disabled = false;
+    newDeleteBtn.innerHTML = "🗑️ Delete Diagnosis";
     deleteBtn.parentNode.replaceChild(newDeleteBtn, deleteBtn);
     
     newDeleteBtn.addEventListener("click", () => {
