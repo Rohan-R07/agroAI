@@ -1648,7 +1648,11 @@ def transcribe_audio():
         return jsonify({"error": "No HF API token configured. Set it in Settings."}), 400
     
     try:
-        headers = {"Authorization": f"Bearer {api_token}"}
+        content_type = audio_file.content_type or "audio/webm"
+        headers = {
+            "Authorization": f"Bearer {api_token}",
+            "Content-Type": content_type
+        }
         url = f"{HF_INFERENCE_BASE}/openai/whisper-large-v3"
         
         # Send language as a query parameter for Whisper to force correct transcription
