@@ -333,6 +333,39 @@ function showGalleryDetail(item) {
     recsList.innerHTML = recs.map(r => `<li>${r}</li>`).join('');
   }
 
+  // Set up Delete Diagnosis button handler
+  const deleteBtn = document.getElementById("deleteGalleryItemBtn");
+  if (deleteBtn) {
+    const newDeleteBtn = deleteBtn.cloneNode(true);
+    deleteBtn.parentNode.replaceChild(newDeleteBtn, deleteBtn);
+    
+    newDeleteBtn.addEventListener("click", () => {
+      if (confirm("Are you sure you want to delete this diagnosis record? This will permanently remove the record and physical image file.")) {
+        newDeleteBtn.disabled = true;
+        newDeleteBtn.innerHTML = "⏳ Deleting...";
+        
+        fetch(`/api/history/${item.id}`, {
+          method: 'DELETE'
+        })
+        .then(res => {
+          if (res.ok) return res.json();
+          throw new Error("Could not delete record from server");
+        })
+        .then(resData => {
+          alert("Diagnosis deleted successfully!");
+          modal.style.display = "none";
+          document.body.style.overflow = "auto";
+          loadGallery(); // Refresh the gallery grid instantly!
+        })
+        .catch(err => {
+          alert("Error deleting diagnosis: " + err.message);
+          newDeleteBtn.disabled = false;
+          newDeleteBtn.innerHTML = "🗑️ Delete Diagnosis";
+        });
+      }
+    });
+  }
+
   modal.style.display = "block";
   document.body.style.overflow = "hidden";
 }

@@ -1295,6 +1295,53 @@ def get_history():
         
     return jsonify(history)
 
+# Delete History/Gallery Entry Endpoint
+@app.route('/api/history/<entry_id>', methods=['DELETE'])
+def delete_history_entry(entry_id):
+    filename_to_delete = None
+    deleted = False
+
+    if USE_MONGO:
+        try:
+            entry = mongo_db.history.find_one({"id": entry_id})
+            if entry:
+                filename_to_delete = entry.get("filename")
+                res = mongo_db.history.delete_one({"id": entry_id})
+                if res.deleted_count > 0:
+                    deleted = True
+        except Exception as e:
+            print(f"[DB] Mongo delete error: {e}")
+            return jsonify({"error": str(e)}), 500
+    else:
+        db = _load_json_db()
+        history = db.get("history", [])
+        new_history = []
+        for item in history:
+            if item.get("id") == entry_id:
+                filename_to_delete = item.get("filename")
+                deleted = True
+            else:
+                new_history.append(item)
+        if deleted:
+            db["history"] = new_history
+            _save_json_db(db)
+
+    # Delete physical file from uploads folder if it exists
+    if filename_to_delete:
+        try:
+            file_path = os.path.join(UPLOADS_DIR, filename_to_delete)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                print(f"[File] Deleted physical file: {filename_to_delete}")
+        except Exception as file_err:
+            print(f"[File] Error deleting file {filename_to_delete}: {file_err}")
+
+    if deleted:
+        return jsonify({"success": True, "message": "Diagnosis deleted successfully."})
+    else:
+        return jsonify({"error": "Diagnosis entry not found."}), 404
+
+
 # Gallery Endpoint
 @app.route('/api/gallery', methods=['GET'])
 def get_gallery():
