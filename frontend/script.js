@@ -191,6 +191,10 @@ analyzeBtn.addEventListener("click", () => {
   formData.append("image", selectedFile);
   const plantDesc = document.getElementById("plantDescription").value.trim();
   if (plantDesc) formData.append("description", plantDesc);
+  
+  const plantLang = document.getElementById("plantVoiceLang").value;
+  formData.append("language", plantLang);
+
   fetch('/api/upload', {
     method: 'POST',
     body: formData
@@ -800,6 +804,9 @@ if (analyzeAnimalBtn) {
     formData.append("image", selectedAnimalFile);
     const animalDesc = document.getElementById("animalDescription").value.trim();
     if (animalDesc) formData.append("description", animalDesc);
+    
+    const animalLang = document.getElementById("animalVoiceLang").value;
+    formData.append("language", animalLang);
 
     fetch('/api/animal/upload', {
       method: 'POST',

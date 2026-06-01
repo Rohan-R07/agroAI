@@ -875,7 +875,7 @@ def run_vit_classification(image_bytes, model_id, api_token, mode="plant"):
         raise Exception(f"ViT model returned status {res.status_code}: {res.text}")
 
 
-def run_llama_explanation(label, user_desc, api_token, model_id, mode="plant"):
+def run_llama_explanation(label, user_desc, api_token, model_id, mode="plant", target_lang="English"):
     """
     Runs Llama 3.1 8B Instruct model to generate structured explanation.
     """
@@ -926,6 +926,7 @@ def run_llama_explanation(label, user_desc, api_token, model_id, mode="plant"):
     system_prompt = (
         "You are an AI diagnostic assistant. Output ONLY a raw, valid JSON object inside triple backticks.\n"
         "Do not include any greeting or conversational filler.\n"
+        f"CRITICAL: All text values in the JSON (except JSON keys themselves) MUST be strictly written in the language: {target_lang}.\n\n"
         "The schema must match exactly:\n"
     )
     
@@ -1384,6 +1385,17 @@ def upload_image():
     # Read optional user description (text/voice transcription)
     user_description = request.form.get("description", "").strip()
     
+    # Read language code
+    language_code = request.form.get("language", "en-US").strip()
+    lang_map = {
+        "en-US": "English", "hi-IN": "Hindi", "bn-IN": "Bengali", "ta-IN": "Tamil",
+        "te-IN": "Telugu", "mr-IN": "Marathi", "gu-IN": "Gujarati", "kn-IN": "Kannada",
+        "ml-IN": "Malayalam", "pa-IN": "Punjabi", "ur-IN": "Urdu", "es-ES": "Spanish",
+        "fr-FR": "French", "de-DE": "German", "pt-BR": "Portuguese", "ar-SA": "Arabic",
+        "zh-CN": "Chinese", "ja-JP": "Japanese"
+    }
+    target_lang = lang_map.get(language_code, "English")
+    
     ext = os.path.splitext(file.filename)[1] or '.jpg'
     unique_filename = f"{uuid.uuid4().hex}{ext}"
     
@@ -1408,6 +1420,7 @@ def upload_image():
             "or nutrient deficiencies. Do NOT default to Healthy if there are ANY visible problems.\n"
             f"\nThe farmer has described the problem: \"{user_description}\"\n"
             "Use this description as critical context to improve your diagnosis.\n\n"
+            f"CRITICAL: All text values in the JSON (except JSON keys themselves) MUST be strictly written in the language: {target_lang}.\n\n"
             "The response MUST contain only a valid JSON matching this schema exactly:\n"
             "{\n"
             '  "crop": "Exact Crop/Plant Name",\n'
@@ -1420,6 +1433,35 @@ def upload_image():
             "}\n"
             "Return ONLY the raw JSON object inside triple backticks."
         )
+        
+    default_prompt = (
+        "You are a world-class AI plant pathologist and entomologist with deep expertise in botany, "
+        "agricultural science, and pest identification. "
+        "Carefully analyze the provided leaf/plant image. Perform ALL of these steps:\n"
+        "1. IDENTIFY the exact plant species from leaf shape, venation, color, and texture.\n"
+        "2. DETECT any visible diseases: fungal (Early Blight, Late Blight, Powdery Mildew, Rust, Anthracnose, "
+        "Sigatoka, Downy Mildew, Septoria), bacterial (Bacterial Leaf Spot, Fire Blight, Citrus Canker), "
+        "or viral (Mosaic Virus, Leaf Curl, Yellowing).\n"
+        "3. DETECT any insect/pest damage: look for holes, chew marks, stippling, webbing, honeydew, "
+        "sooty mold, leaf miners, galls, or visible insects (aphids, whiteflies, caterpillars, mites, "
+        "thrips, mealybugs, scale insects, leaf beetles, borers).\n"
+        "4. DETECT nutrient deficiencies: yellowing (nitrogen), purple discoloration (phosphorus), "
+        "brown leaf edges (potassium), interveinal chlorosis (iron/magnesium).\n"
+        "5. If the plant is genuinely healthy with NO signs of disease, pests, or deficiency, "
+        "report it as Healthy. Do NOT default to Healthy if there are ANY visible problems.\n\n"
+        f"CRITICAL: All text values in the JSON (except JSON keys themselves) MUST be strictly written in the language: {target_lang}.\n\n"
+        "The response MUST contain only a valid JSON matching this schema exactly:\n"
+        "{\n"
+        '  "crop": "Exact Crop/Plant Name",\n'
+        '  "disease": "Specific Disease or Pest Name (NOT just Healthy unless truly healthy)",\n'
+        '  "confidence": 0.90,\n'
+        '  "status": "Diseased" or "Healthy",\n'
+        '  "severity": "Critical" or "High" or "Moderate" or "Low",\n'
+        '  "description": "Detailed description of visible symptoms, affected areas, and progression stage",\n'
+        '  "recommendations": ["Specific Treatment 1", "Specific Treatment 2", "Specific Treatment 3"]\n'
+        "}\n"
+        "Return ONLY the raw JSON object inside triple backticks."
+    )
     
     result = None
     pipeline_mode = settings.get("pipeline_mode", "single")
@@ -1440,7 +1482,7 @@ def upload_image():
             
             # Step 3: Llama Explanation
             llama_model = settings.get("llama_model_id", "meta-llama/Llama-3.1-8B-Instruct")
-            result = run_llama_explanation(vit_result["label"], user_description, api_token, llama_model, mode="plant")
+            result = run_llama_explanation(vit_result["label"], user_description, api_token, llama_model, mode="plant", target_lang=target_lang)
             result["confidence"] = float(vit_result["confidence"])
             print(f"[Pipeline] Step 3 done – crop={result.get('crop')}, disease={result.get('disease')}")
         except Exception as pipe_err:
@@ -1450,7 +1492,7 @@ def upload_image():
     if pipeline_mode == "single" and result is None:
         # ── Single Model: Gemma-4 Multimodal ──
         try:
-            result = query_gemma_4_multimodal(image_bytes, ext, api_token, system_prompt=custom_prompt)
+            result = query_gemma_4_multimodal(image_bytes, ext, api_token, system_prompt=custom_prompt or default_prompt)
         except Exception as gemma_err:
             print(f"[Gemma 4 Multimodal] Failed: {gemma_err}")
             try:
@@ -1514,6 +1556,17 @@ def animal_upload():
     # Read optional user description (text/voice transcription)
     user_description = request.form.get("description", "").strip()
     
+    # Read language code
+    language_code = request.form.get("language", "en-US").strip()
+    lang_map = {
+        "en-US": "English", "hi-IN": "Hindi", "bn-IN": "Bengali", "ta-IN": "Tamil",
+        "te-IN": "Telugu", "mr-IN": "Marathi", "gu-IN": "Gujarati", "kn-IN": "Kannada",
+        "ml-IN": "Malayalam", "pa-IN": "Punjabi", "ur-IN": "Urdu", "es-ES": "Spanish",
+        "fr-FR": "French", "de-DE": "German", "pt-BR": "Portuguese", "ar-SA": "Arabic",
+        "zh-CN": "Chinese", "ja-JP": "Japanese"
+    }
+    target_lang = lang_map.get(language_code, "English")
+    
     settings = load_settings()
     api_token = settings.get("api_token", "")
     
@@ -1532,6 +1585,7 @@ def animal_upload():
         "Also, determine if this is a major problem requiring urgent veterinary hospital visit (set 'major' to true if severity is Moderate or High, "
         "or if there's any immediate life-threatening danger; set 'major' to false if it's a mild issue like a light scratch, mild itch, or standard healthy checkup). "
         + user_context +
+        f"\nCRITICAL: All text values in the JSON (except JSON keys themselves) MUST be strictly written in the language: {target_lang}.\n\n"
         "Return ONLY a valid JSON object matching this schema exactly:\n"
         "{\n"
         '  "animal": "Animal Type (e.g., Dog, Cat, Cow, Goat, Chicken)",\n'
