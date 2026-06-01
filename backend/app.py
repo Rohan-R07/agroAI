@@ -14,8 +14,15 @@ from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 
 # Setup directories
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-UPLOADS_DIR = os.path.join(BASE_DIR, 'data', 'uploads')
-DATA_FILE = os.path.join(BASE_DIR, 'data', 'database.json')
+IS_VERCEL = os.environ.get("VERCEL") == "1"
+
+if IS_VERCEL:
+    UPLOADS_DIR = '/tmp/uploads'
+    DATA_FILE = '/tmp/database.json'
+else:
+    UPLOADS_DIR = os.path.join(BASE_DIR, 'data', 'uploads')
+    DATA_FILE = os.path.join(BASE_DIR, 'data', 'database.json')
+
 FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, 'frontend'))
 if not os.path.exists(FRONTEND_DIR):
     FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'frontend'))
