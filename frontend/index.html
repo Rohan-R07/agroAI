@@ -163,7 +163,17 @@
               Drag and drop image here
             </p>
 
-            <input type="file" id="imageInput" accept="image/*">
+            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 10px; flex-wrap: wrap;">
+              <label for="imageInput" class="btn" style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; background: linear-gradient(to right, #2563eb, #3b82f6); margin: 0; padding: 10px 20px; border-radius: 8px;">
+                📁 Choose Image
+              </label>
+              <input type="file" id="imageInput" accept="image/*" style="display: none;">
+
+              <label for="cameraInput" class="btn" style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; background: linear-gradient(to right, #10b981, #059669); margin: 0; padding: 10px 20px; border-radius: 8px;">
+                📷 Take Photo
+              </label>
+              <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+            </div>
 
             <div class="preview" id="preview" style="display: none; margin-top: 20px;">
               <div style="position: relative; display: inline-block; width: 100%;">
@@ -417,7 +427,17 @@
           <div class="upload-area">
             <h2>Diagnose Sick Animal</h2>
             <p>Upload a photo of your sick dog, cat, cow, goat, chicken, etc.</p>
-            <input type="file" id="animalImageInput" accept="image/*">
+            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 10px; flex-wrap: wrap;">
+              <label for="animalImageInput" class="btn" style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; background: linear-gradient(to right, #2563eb, #3b82f6); margin: 0; padding: 10px 20px; border-radius: 8px;">
+                📁 Choose Image
+              </label>
+              <input type="file" id="animalImageInput" accept="image/*" style="display: none;">
+
+              <label for="animalCameraInput" class="btn" style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; background: linear-gradient(to right, #10b981, #059669); margin: 0; padding: 10px 20px; border-radius: 8px;">
+                📷 Take Photo
+              </label>
+              <input type="file" id="animalCameraInput" accept="image/*" capture="environment" style="display: none;">
+            </div>
             
             <div class="preview" id="animalPreview" style="display: none; margin-top: 20px;">
               <img id="animalPreviewImage" style="max-width: 100%; border-radius: 14px; max-height: 300px; object-fit: contain;">

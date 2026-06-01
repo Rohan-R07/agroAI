@@ -157,7 +157,7 @@ const analyzeBtn = document.getElementById("analyzeBtn");
 const loadingSpinner = document.getElementById("loadingSpinner");
 const analysisResult = document.getElementById("analysisResult");
 
-imageInput.addEventListener("change", function(e) {
+const handlePlantFileSelect = function(e) {
   const file = e.target.files[0];
   if (file) {
     selectedFile = file;
@@ -169,7 +169,15 @@ imageInput.addEventListener("change", function(e) {
     // Hide old results
     analysisResult.style.display = "none";
   }
-});
+};
+
+if (imageInput) {
+  imageInput.addEventListener("change", handlePlantFileSelect);
+}
+const cameraInput = document.getElementById("cameraInput");
+if (cameraInput) {
+  cameraInput.addEventListener("change", handlePlantFileSelect);
+}
 
 analyzeBtn.addEventListener("click", () => {
   if (!selectedFile) return;
@@ -760,18 +768,24 @@ const animalResult = document.getElementById("animalResult");
 
 let selectedAnimalFile = null;
 
+const handleAnimalFileSelect = function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    selectedAnimalFile = file;
+    animalPreview.style.display = "block";
+    animalPreviewImage.src = URL.createObjectURL(file);
+    analyzeAnimalBtn.style.display = "block";
+    document.getElementById("animalDescSection").style.display = "block";
+    animalResult.style.display = "none";
+  }
+};
+
 if (animalImageInput) {
-  animalImageInput.addEventListener("change", function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      selectedAnimalFile = file;
-      animalPreview.style.display = "block";
-      animalPreviewImage.src = URL.createObjectURL(file);
-      analyzeAnimalBtn.style.display = "block";
-      document.getElementById("animalDescSection").style.display = "block";
-      animalResult.style.display = "none";
-    }
-  });
+  animalImageInput.addEventListener("change", handleAnimalFileSelect);
+}
+const animalCameraInput = document.getElementById("animalCameraInput");
+if (animalCameraInput) {
+  animalCameraInput.addEventListener("change", handleAnimalFileSelect);
 }
 
 if (analyzeAnimalBtn) {
