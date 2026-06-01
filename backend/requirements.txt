@@ -5,3 +5,4 @@ pillow
 pymongo
 dnspython
 openai
+certifi
