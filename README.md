@@ -6,6 +6,7 @@ AgroAI is a highly polished, responsive, and beautiful AI-powered diagnostic pla
 
 ---
 
+
 ## ✨ Features & Capabilities
 
 ### 1. 🔬 Upgraded AI Vision Diagnostics
