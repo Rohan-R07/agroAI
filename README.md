@@ -1,3 +1,4 @@
+
 # 🌱 AgroAI - Intelligent Plant & Animal Health Monitoring Platform
 
 AgroAI is a highly polished, responsive, and beautiful AI-powered diagnostic platform designed for modern agriculture and animal husbandry. It provides end-to-end intelligent vision pipelines for real-time plant crop pathology, insect infestation analysis, animal health diagnostics, nearby veterinary care integration, local history tracking, and professional agricultural report generation.
